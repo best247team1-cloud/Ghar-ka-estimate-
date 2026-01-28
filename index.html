@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Ghar Ka Estimate Pro - India's Best Construction Cost Calculator</title>
+    <meta name="description" content="Calculate your home construction cost in India instantly. Get detailed material breakdown for Cement, Steel, and Labor costs with current market rates. Free Tool.">
+    <meta name="keywords" content="construction cost calculator india, ghar banane ka kharcha, home estimate tool, civil engineering calculator, house construction cost 2024">
+    <meta name="author" content="GharEstimate Pro">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.gharkaestimate.com/">
+    <meta property="og:title" content="🏠 Ghar Banane Ka Kharcha Jaaniye - Free Calculator">
+    <meta property="og:description" content="Mera ghar banane mein kitna paisa lagega? Check this free tool to get a full estimate with material breakdown.">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/2558/2558943.png"> 
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Ghar Ka Estimate Pro - Construction Calculator">
+    <meta property="twitter:description" content="Calculate construction cost in 1 click. Download PDF estimates.">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Ghar Ka Estimate Pro",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "description": "A free tool to calculate home construction costs in India based on plot area and material quality."
+    }
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            --primary: #FFD700; /* Yellow */
+            --secondary: #2c3e50; /* Dark Blue-Grey */
+            --accent: #e74c3c; /* Red */
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #e0e0e0;
+        }
+
+        [data-theme="dark"] {
+            --primary: #FFD700;
+            --secondary: #ecf0f1;
+            --bg: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text: #ffffff;
+            --border: #444;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- TICKER --- */
+        .ticker-wrap {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            overflow: hidden;
+            height: 30px;
+            background-color: #000;
+            padding-left: 100%;
+            box-sizing: border-box;
+            z-index: 1000;
+            border-bottom: 2px solid var(--primary);
+        }
+        .ticker { display: inline-block; height: 30px; line-height: 30px; white-space: nowrap; padding-right: 100%; animation: ticker 30s linear infinite; }
+        .ticker-wrap:hover .ticker { animation-play-state: paused; cursor: pointer; }
+        .ticker-item { display: inline-block; padding: 0 2rem; font-size: 14px; color: var(--primary); font-weight: bold; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
+        /* HEADER */
+        header {
+            background-color: #222;
+            color: var(--primary);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid var(--primary);
+            margin-top: 30px;
+        }
+
+        .theme-toggle {
+            cursor: pointer; background: none; border: 1px solid var(--primary); color: var(--primary);
+            padding: 5px 10px; border-radius: 20px; font-size: 14px; transition: transform 0.3s ease;
+        }
+        .theme-toggle:hover { transform: scale(1.1); background-color: rgba(255, 215, 0, 0.1); }
+
+        /* ADSENSE SLOT */
+        .ad-slot {
+            width: 100%;
+            max-width: 700px;
+            margin: 10px auto;
+            background: #eee;
+            border: 1px dashed #999;
+            text-align: center;
+            padding: 10px;
+            color: #777;
+            font-size: 12px;
+            display: block; 
+        }
+
+        /* CONTAINER */
+        .container { max-width: 700px; margin: 20px auto; padding: 20px; flex: 1; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 1px solid var(--border); margin-bottom: 20px; }
+        
+        h2, h3 { margin-top: 0; color: var(--text); }
+        .input-header { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 5px; }
+        .unit-toggle { font-size: 12px; padding: 2px 5px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); }
+        label { display: block; font-weight: 600; margin: 0; }
+        input, select { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; background: var(--card-bg); color: var(--text); font-size: 16px; box-sizing: border-box; }
+        
+        .add-city-link { font-size: 12px; color: #3498db; text-align: right; cursor: pointer; display: block; margin-top: 5px; text-decoration: underline; }
+        .unit-helper { font-size: 11px; color: #777; margin-top: 2px; text-align: right; display: none; }
+        
+        /* Error & Info */
+        input.error { border-color: var(--accent); animation: shake 0.3s; }
+        .error-msg { color: var(--accent); font-size: 12px; display: none; margin-top: 5px; }
+        .info-box { background-color: rgba(52, 152, 219, 0.1); border-left: 4px solid #3498db; padding: 10px; margin-top: 10px; font-size: 14px; color: var(--text); display: none; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+
+        .btn { background: var(--primary); color: #000; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 0 #d4b100; transition: transform 0.1s; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+
+        /* RESULT & ANIMATION */
+        #resultSection { display: none; opacity: 0; transform: translateY(20px); }
+        .slide-up { animation: slideUpEffect 0.6s ease-out forwards; }
+        @keyframes slideUpEffect { to { opacity: 1; transform: translateY(0); } }
+
+        .bill-header { display: flex; justify-content: space-between; border-bottom: 2px dashed var(--border); padding-bottom: 10px; margin-bottom: 15px; }
+        .pdf-logo { display: none; font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; border-bottom: 4px solid #FFD700; padding-bottom: 10px; }
+        .grand-total { background: linear-gradient(45deg, #2c3e50, #000); color: #fff; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+        .grand-total h1 { margin: 0; font-size: 2.5rem; color: var(--primary); }
+
+        .chart-container { display: flex; justify-content: center; margin: 20px 0; }
+        .pie-chart { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(#FFD700 0% 25%, #3498db 25% 75%, #e74c3c 75% 100%); border: 5px solid var(--card-bg); box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .chart-legend { text-align: center; font-size: 12px; margin-bottom: 20px; }
+        .dot { height: 10px; width: 10px; display: inline-block; border-radius: 50%; margin-right: 5px; }
+        .breakdown-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .sub-text { font-size: 0.85em; color: #777; }
+
+        .action-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-small { flex: 1; padding: 10px; font-size: 14px; border-radius: 5px; border: none; cursor: pointer; color: white; }
+        .whatsapp { background: #25D366; } .copy { background: #3498db; } .save { background: #2c3e50; } .pdf-btn { background: #e74c3c; }
+
+        #savedHistory { display: none; margin-top: 20px; }
+        .history-item { background: #eee; padding: 10px; margin-bottom: 5px; border-radius: 5px; font-size: 14px; color: #333; display: flex; justify-content: space-between;}
+        #historyChartContainer { margin-top: 15px; height: 250px; width: 100%; }
+
+        .faq-section { margin-top: 30px; }
+        .faq-item { margin-bottom: 15px; }
+        .faq-question { font-weight: bold; cursor: pointer; color: var(--secondary); }
+        
+        /* FOOTER */
+        footer {
+            background: #1a1a1a;
+            color: #ccc;
+            padding: 30px 20px;
+            margin-top: auto;
+            border-top: 4px solid var(--primary);
+        }
+        .footer-content {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .footer-desc h3 { color: var(--primary); margin-bottom: 10px; }
+        .footer-desc p { font-size: 13px; line-height: 1.6; color: #999; margin-bottom: 20px; }
+        .footer-links { margin-bottom: 20px; }
+        .footer-links a { color: #fff; text-decoration: none; margin: 0 8px; font-size: 14px; cursor: pointer; transition: color 0.3s; display: inline-block; margin-bottom: 5px;}
+        .footer-links a:hover { color: var(--primary); text-decoration: underline; }
+        .copyright { font-size: 12px; color: #555; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
+
+        /* MODALS */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; }
+        .modal-content { background: var(--card-bg); margin: 10% auto; padding: 25px; width: 85%; max-width: 500px; border-radius: 10px; position: relative; max-height: 80vh; overflow-y: auto; }
+        .close { float: right; font-size: 28px; cursor: pointer; color: var(--text); }
+        .modal-content h2 { border-bottom: 2px solid var(--primary); padding-bottom: 10px; color: var(--secondary); }
+    </style>
+</head>
+<body onload="initPage()">
+
+<div class="ticker-wrap">
+    <div class="ticker" id="tickerContent">
+        <div class="ticker-item">Loading Market Rates...</div>
+    </div>
+</div>
+
+<header>
+    <div style="font-weight:bold; font-size:1.2rem;">🏗️ GharEstimate<span style="color:var(--primary)">PRO</span></div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+</header>
+
+<div class="container">
+    
+    <div class="ad-slot">
+        📢 Advertisement Space (Google AdSense)
+    </div>
+
+    <div class="card">
+        <h3>🏠 Start Your Calculation</h3>
+
+        <label style="margin-top: 15px;">📍 Select Location</label>
+        <select id="city" onchange="updateCityRates()" style="margin-top: 5px;">
+            <option value="national">National Average (Standard)</option>
+            <option value="delhi">Delhi NCR (High Rates)</option>
+            <option value="mumbai">Mumbai (Very High Rates)</option>
+            <option value="tier2">Tier-2 City (Patna/Lucknow/Indore)</option>
+            <option value="village">Village/Rural (Low Rates)</option>
+        </select>
+        <span class="add-city-link" onclick="addCustomLocation()">➕ Add Custom City</span>
+
+        <div class="input-header">
+            <label for="area">Plot Area</label>
+            <select id="unitInput" class="unit-toggle" onchange="updateUnitHelper()">
+                <option value="sqft">Sq. Ft.</option>
+                <option value="sqm">Sq. Meters</option>
+            </select>
+        </div>
+        <input type="number" id="area" placeholder="Enter Area">
+        <div id="unitHelper" class="unit-helper">ℹ️ 1 Sq. Meter ≈ 10.76 Sq. Feet</div>
+        <div id="areaError" class="error-msg">⚠️ Please enter a valid positive number.</div>
+
+        <label style="margin-top: 15px;">Construction Type</label>
+        <select id="quality" onchange="updateQualityInfo()" style="margin-top: 5px;">
+            <option value="1400">Standard (Economy)</option>
+            <option value="1800">Premium (Best Seller)</option>
+            <option value="2200">Luxury (High End)</option>
+        </select>
+        
+        <div id="qualityInfo" class="info-box"></div>
+
+        <button class="btn" onclick="calculate()">🚀 Calculate Cost Now</button>
+    </div>
+
+    <div class="ad-slot">
+        📢 Advertisement Space (Google AdSense)
+    </div>
+
+    <div id="resultSection" class="card">
+        <div id="pdfContent"> 
+            <div class="pdf-logo">🏗️ GharEstimate<span style="color:#FFD700">PRO</span></div>
+
+            <div class="bill-header">
+                <span>Date: <span id="dateDisplay"></span></span>
+                <span>Loc: <span id="locDisplay" style="font-weight:bold"></span></span>
+            </div>
+
+            <div class="grand-total">
+                <small>Total Estimated Cost</small>
+                <h1 id="totalCost">₹0</h1>
+            </div>
+
+            <div class="chart-container">
+                <div class="pie-chart"></div>
+            </div>
+            
+            <div class="chart-legend">
+                <span class="dot" style="background:#FFD700"></span>Labor (25%) &nbsp;
+                <span class="dot" style="background:#3498db"></span>Material (50%) &nbsp;
+                <span class="dot" style="background:#e74c3c"></span>Finishing (25%)
+            </div>
+
+            <h3>📋 Detailed Breakdown</h3>
+            <div class="breakdown-row"><div><strong>Labor Cost</strong><br><span class="sub-text">Workforce (25%)</span></div><div id="laborCost">₹0</div></div>
+            <div class="breakdown-row"><div><strong>Material</strong><br><span class="sub-text">Cement, Steel (50%)</span></div><div id="materialCost">₹0</div></div>
+            <div class="breakdown-row"><div><strong>Finishing</strong><br><span class="sub-text">Paint, Tiles (25%)</span></div><div id="finishCost">₹0</div></div>
+            <div class="breakdown-row" style="background-color: rgba(255, 215, 0, 0.1);"><div><strong>⚠️ Safety Margin</strong><br><span class="sub-text">Extra 5% Fund</span></div><div id="safetyCost">₹0</div></div>
+        </div>
+
+        <div class="action-group">
+            <button class="btn-small save" onclick="saveEstimate()">💾 Save</button>
+            <button class="btn-small pdf-btn" onclick="downloadPDF()">📄 PDF</button>
+            <button class="btn-small whatsapp" onclick="shareWhatsapp()">📲 Share</button>
+            <button class="btn-small copy" onclick="copyText()">📋 Copy</button>
+        </div>
+    </div>
+
+    <div id="savedHistory" class="card">
+        <h3>📂 Saved Estimates</h3>
+        <div id="historyChartContainer"><canvas id="historyChart"></canvas></div>
+        <div id="historyList" style="margin-top:15px;"></div>
+        <button class="btn-small" style="background:#777; margin-top:10px;" onclick="clearHistory()">Clear History</button>
+    </div>
+
+    <div class="faq-section">
+        <h3>❓ Frequently Asked Questions</h3>
+        <div class="faq-item"><div class="faq-question">👉 How accurate are these estimates?</div><div class="sub-text">Our tool uses current market averages. Actual costs can vary by 10-15%.</div></div>
+        <div class="faq-item"><div class="faq-question">👉 What is included in finishing?</div><div class="sub-text">Flooring, painting, electrical wiring, plumbing, and basic wood work.</div></div>
+        <div class="faq-item"><div class="faq-question">👉 Does location affect price?</div><div class="sub-text">Yes! Cities like Mumbai/Delhi have higher rates. Use the Location selector.</div></div>
+    </div>
+
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-desc">
+            <h3>🏗️ GharEstimate Pro</h3>
+            <p>
+                GharEstimate Pro is India's most trusted and free online home construction cost calculator. 
+                We help home builders, civil engineers, and contractors get quick and accurate budget estimates. 
+                Our tool considers live market rates for cement, steel, and labor across various Indian cities 
+                including Delhi, Mumbai, and Tier-2 regions. Build your dream home with proper financial planning.
+            </p>
+        </div>
+        
+        <div class="footer-links">
+            <a onclick="openModal('howTo')">How to Use</a> |
+            <a onclick="openModal('about')">About Us</a> |
+            <a onclick="openModal('privacy')">Privacy Policy</a> |
+            <a onclick="openModal('terms')">Terms of Service</a> |
+            <a onclick="openModal('contact')">Contact Us</a>
+        </div>
+
+        <div class="copyright">
+            &copy; 2024 GharEstimate Pro. All Rights Reserved. <br>
+            Designed for Indian Construction Market.
+        </div>
+    </div>
+</footer>
+
+<div id="modalOverlay" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">Title</h2>
+        <div id="modalBody">Content goes here...</div>
+    </div>
+</div>
+
+<script>
+    /* --- DATA & LOGIC --- */
+    
+    let cityData = {
+        national: { multiplier: 1, text: "📢 Market Rates: Cement ₹380 | Steel ₹65 | Labor ₹500" },
+        delhi:    { multiplier: 1.15, text: "📢 Delhi NCR Rates: Cement ₹410 | Steel ₹68 | Labor ₹700 (High Demand)" },
+        mumbai:   { multiplier: 1.25, text: "📢 Mumbai Rates: Cement ₹430 | Steel ₹72 | Labor ₹850 (Premium Rates)" },
+        tier2:    { multiplier: 0.90, text: "📢 Tier-2 Rates: Cement ₹360 | Steel ₹62 | Labor ₹450" },
+        village:  { multiplier: 0.85, text: "📢 Rural Rates: Cement ₹350 | Steel ₹60 | Labor ₹400" }
+    };
+
+    const qualityDetails = {
+        1400: "✅ <b>Standard:</b> Uses local bricks, standard cement (PPC), ceramic tiles (₹30/sqft), and local sanitary fittings.",
+        1800: "🌟 <b>Premium:</b> Uses red clay bricks, branded cement (OPC), vitrified tiles (₹50/sqft), modular switches, and branded fittings.",
+        2200: "💎 <b>Luxury:</b> Uses AAC blocks/First-class bricks, Italian marble, Teak wood doors, false ceiling, and top-tier brands."
+    };
+
+    let historyChart = null;
+
+    function initPage() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            document.querySelector('.theme-toggle').innerText = "☀️ Light Mode";
+        }
+        loadCustomCities();
+        updateCityRates();
+        updateQualityInfo();
+        loadHistory();
+    }
+
+    function addCustomLocation() {
+        const name = prompt("Enter City/Location Name:");
+        if (!name) return;
+        const rate = prompt("Enter Rate Multiplier (e.g. 1.1):");
+        if (!rate || isNaN(rate)) { alert("Invalid Number"); return; }
+        const cityId = "custom_" + Date.now();
+        const customData = { name: name, multiplier: parseFloat(rate) };
+        let customLocations = JSON.parse(localStorage.getItem('gharEstimateLocs')) || {};
+        customLocations[cityId] = customData;
+        localStorage.setItem('gharEstimateLocs', JSON.stringify(customLocations));
+        loadCustomCities();
+        alert("Location Added!");
+    }
+
+    function loadCustomCities() {
+        let customLocations = JSON.parse(localStorage.getItem('gharEstimateLocs')) || {};
+        const select = document.getElementById('city');
+        const options = select.getElementsByTagName('option');
+        for (let i = options.length - 1; i >= 0; i--) { if (options[i].value.startsWith('custom_')) select.remove(i); }
+        for (let id in customLocations) {
+            const loc = customLocations[id];
+            const opt = document.createElement("option");
+            opt.value = id; opt.innerText = `📍 ${loc.name} (Custom)`; select.appendChild(opt);
+            cityData[id] = { multiplier: loc.multiplier, text: `📢 ${loc.name} Rates: Customized (${loc.multiplier}x)` };
+        }
+    }
+
+    function updateCityRates() {
+        const cityKey = document.getElementById('city').value;
+        const data = cityData[cityKey];
+        const ticker = document.getElementById('tickerContent');
+        ticker.innerHTML = ""; 
+        const item = document.createElement('div');
+        item.className = 'ticker-item'; item.innerText = data.text; ticker.appendChild(item);
+        if(document.getElementById('resultSection').style.display === 'block'){ calculate(); }
+    }
+
+    function updateUnitHelper() {
+        const unit = document.getElementById('unitInput').value;
+        const helper = document.getElementById('unitHelper');
+        helper.style.display = (unit === 'sqm') ? 'block' : 'none';
+    }
+
+    function updateQualityInfo() {
+        document.getElementById('qualityInfo').innerHTML = qualityDetails[document.getElementById('quality').value];
+        document.getElementById('qualityInfo').style.display = 'block';
+    }
+
+    function calculate() {
+        const areaInput = document.getElementById('area');
+        const areaError = document.getElementById('areaError');
+        let areaValue = parseFloat(areaInput.value);
+        const unit = document.getElementById('unitInput').value;
+
+        areaInput.classList.remove('error'); areaError.style.display = 'none';
+        if(isNaN(areaValue) || areaValue <= 0) { areaInput.classList.add('error'); areaError.style.display = 'block'; return; }
+        if (unit === 'sqm') { areaValue = areaValue * 10.764; }
+
+        let rate = parseInt(document.getElementById('quality').value);
+        const cityKey = document.getElementById('city').value;
+        const multiplier = cityData[cityKey].multiplier;
+        rate = Math.round(rate * multiplier);
+
+        const baseCost = areaValue * rate;
+        const labor = Math.round(baseCost * 0.25);
+        const material = Math.round(baseCost * 0.50);
+        const finishing = Math.round(baseCost * 0.25);
+        const safety = Math.round(baseCost * 0.05);
+        const grandTotal = baseCost + safety;
+
+        document.getElementById('totalCost').innerText = formatMoney(grandTotal);
+        document.getElementById('laborCost').innerText = formatMoney(labor);
+        document.getElementById('materialCost').innerText = formatMoney(material);
+        document.getElementById('finishCost').innerText = formatMoney(finishing);
+        document.getElementById('safetyCost').innerText = formatMoney(safety);
+        
+        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString();
+        document.getElementById('locDisplay').innerText = document.getElementById('city').options[document.getElementById('city').selectedIndex].text.split('(')[0];
+
+        const resultSection = document.getElementById('resultSection');
+        resultSection.classList.remove('slide-up'); resultSection.style.display = 'block'; void resultSection.offsetWidth; resultSection.classList.add('slide-up');
+        window.scrollTo({ top: resultSection.offsetTop, behavior: 'smooth' });
+    }
+
+    function downloadPDF() {
+        const element = document.getElementById('pdfContent');
+        const logo = document.querySelector('.pdf-logo');
+        logo.style.display = 'block';
+        const opt = { margin: 0.5, filename: 'GharEstimate_Pro.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save().then(() => { logo.style.display = 'none'; });
+    }
+
+    function saveEstimate() {
+        const areaInputVal = document.getElementById('area').value; 
+        const unit = document.getElementById('unitInput').value; 
+        const costStr = document.getElementById('totalCost').innerText;
+        const costNum = parseInt(costStr.replace(/[^\d]/g, ''));
+        const date = new Date().toLocaleDateString();
+        const city = document.getElementById('city').value;
+        const areaLabel = `${areaInputVal} ${unit === 'sqm' ? 'sq.m' : 'sq.ft'}`;
+        const entry = { areaLabel, costStr, costNum, date, city };
+        let history = JSON.parse(localStorage.getItem('gharEstimateHistory')) || [];
+        history.push(entry); localStorage.setItem('gharEstimateHistory', JSON.stringify(history));
+        loadHistory(); alert("Estimate Saved!");
+    }
+
+    function loadHistory() {
+        let history = JSON.parse(localStorage.getItem('gharEstimateHistory')) || [];
+        const container = document.getElementById('historyList');
+        const section = document.getElementById('savedHistory');
+        if(history.length > 0) {
+            section.style.display = 'block'; container.innerHTML = "";
+            [...history].reverse().forEach(item => { container.innerHTML += `<div class="history-item"><span><strong>${item.date}</strong>: ${item.areaLabel}</span><span><strong>${item.costStr}</strong></span></div>`; });
+            renderChart(history);
+        } else { section.style.display = 'none'; }
+    }
+
+    function renderChart(history) {
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        const labels = history.map((item, index) => `Est ${index + 1}`);
+        const dataPoints = history.map(item => item.costNum);
+        if(historyChart) { historyChart.destroy(); }
+        historyChart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Cost Trend', data: dataPoints, borderColor: '#FFD700', backgroundColor: 'rgba(255, 215, 0, 0.2)', borderWidth: 2, tension: 0.3, fill: true }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false } } } });
+    }
+
+    function clearHistory() { if(confirm("Clear history?")) { localStorage.removeItem('gharEstimateHistory'); loadHistory(); } }
+    function formatMoney(amount) { return "₹ " + amount.toLocaleString('en-IN'); }
+
+    function toggleTheme() {
+        const body = document.body;
+        const btn = document.querySelector('.theme-toggle');
+        if(body.getAttribute('data-theme') === 'dark') { body.removeAttribute('data-theme'); btn.innerText = "🌙 Dark Mode"; localStorage.setItem('theme', 'light'); } 
+        else { body.setAttribute('data-theme', 'dark'); btn.innerText = "☀️ Light Mode"; localStorage.setItem('theme', 'dark'); }
+    }
+
+    function shareWhatsapp() {
+        const total = document.getElementById('totalCost').innerText;
+        const text = `I just calculated my home construction cost. Total Estimate: ${total}. Check it out on GharEstimate Pro!`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function copyText() { navigator.clipboard.writeText(`My House Estimate: ${document.getElementById('totalCost').innerText}`).then(() => { alert("Copied!"); }); }
+
+    function openModal(type) {
+        const modal = document.getElementById('modalOverlay');
+        const title = document.getElementById('modalTitle');
+        const body = document.getElementById('modalBody');
+        modal.style.display = 'block';
+        
+        if(type === 'privacy') {
+            title.innerText = "Privacy Policy";
+            body.innerHTML = "<p><strong>Data Protection:</strong> We do not store any user data on our servers. All calculations, history, and custom locations are stored locally on your device (LocalStorage).<br><br><strong>Cookies:</strong> We use standard cookies for Google Analytics and AdSense to improve user experience.</p>";
+        } else if(type === 'terms') {
+            title.innerText = "Terms of Service";
+            body.innerHTML = "<p><strong>Accuracy:</strong> This tool provides estimates based on average market rates. Actual costs may vary.<br><br><strong>Liability:</strong> GharEstimate Pro is not responsible for any financial loss incurred based on these estimates. Always consult a professional contractor.</p>";
+        } else if(type === 'contact') {
+            title.innerText = "Contact Us";
+            body.innerHTML = "<p>For advertising or feedback, email us at:<br><strong>best247team@gmail.com</strong><br><br>Address: Digital Tech Hub, Bangalore, India.</p>";
+        } else if(type === 'about') {
+            title.innerText = "About Us";
+            body.innerHTML = "<p>We are a team of Civil Engineers and Developers dedicated to bringing transparency to the Indian construction market. Our mission is to help common people budget their dream homes accurately.</p>";
+        } else if(type === 'howTo') {
+            title.innerText = "How to Use";
+            body.innerHTML = "<ol><li>Select your City/Location.</li><li>Enter Plot Area and select Unit (Sq.Ft/Sq.M).</li><li>Choose Quality (Standard/Premium/Luxury).</li><li>Click Calculate to see Material Breakdown.</li><li>Save or Download PDF.</li></ol>";
+        }
+    }
+
+    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == document.getElementById('modalOverlay')) { closeModal(); } }
+</script>
+
+</body>
+</html>
