@@ -244,9 +244,9 @@
 
         <label style="margin-top: 15px;">Construction Type</label>
         <select id="quality" onchange="updateQualityInfo()" style="margin-top: 5px;">
-            <option value="1400">Standard (Economy)</option>
-            <option value="1800">Premium (Best Seller)</option>
-            <option value="2200">Luxury (High End)</option>
+            <option value="1200">Standard (Economy - ₹1200/sq.ft)</option>
+            <option value="1600">Premium (Best Seller - ₹1600/sq.ft)</option>
+            <option value="2000">Luxury (High End - ₹2000+/sq.ft)</option>
         </select>
         
         <div id="qualityInfo" class="info-box"></div>
@@ -351,18 +351,20 @@
 <script>
     /* --- DATA & LOGIC --- */
     
+    // UPDATED REALISTIC MULTIPLIERS
     let cityData = {
-        national: { multiplier: 1, text: "📢 Market Rates: Cement ₹380 | Steel ₹65 | Labor ₹500" },
-        delhi:    { multiplier: 1.15, text: "📢 Delhi NCR Rates: Cement ₹410 | Steel ₹68 | Labor ₹700 (High Demand)" },
-        mumbai:   { multiplier: 1.25, text: "📢 Mumbai Rates: Cement ₹430 | Steel ₹72 | Labor ₹850 (Premium Rates)" },
-        tier2:    { multiplier: 0.90, text: "📢 Tier-2 Rates: Cement ₹360 | Steel ₹62 | Labor ₹450" },
-        village:  { multiplier: 0.85, text: "📢 Rural Rates: Cement ₹350 | Steel ₹60 | Labor ₹400" }
+        national: { multiplier: 1, text: "📢 Market Rates: Cement ₹370 | Steel ₹62 | Labor ₹450" },
+        delhi:    { multiplier: 1.10, text: "📢 Delhi NCR: Cement ₹400 | Steel ₹65 | Labor ₹650" },
+        mumbai:   { multiplier: 1.20, text: "📢 Mumbai: Cement ₹420 | Steel ₹68 | Labor ₹800" },
+        tier2:    { multiplier: 0.85, text: "📢 Tier-2 City: Cement ₹350 | Steel ₹60 | Labor ₹400" },
+        village:  { multiplier: 0.75, text: "📢 Village/Rural: Cement ₹340 | Steel ₹58 | Labor ₹350" }
     };
 
+    // UPDATED QUALITY DESCRIPTIONS
     const qualityDetails = {
-        1400: "✅ <b>Standard:</b> Uses local bricks, standard cement (PPC), ceramic tiles (₹30/sqft), and local sanitary fittings.",
-        1800: "🌟 <b>Premium:</b> Uses red clay bricks, branded cement (OPC), vitrified tiles (₹50/sqft), modular switches, and branded fittings.",
-        2200: "💎 <b>Luxury:</b> Uses AAC blocks/First-class bricks, Italian marble, Teak wood doors, false ceiling, and top-tier brands."
+        1200: "✅ <b>Standard (Economy):</b> Cost effective. Uses local bricks, PPC cement, budget tiles (₹25/sqft), and standard fittings.",
+        1600: "🌟 <b>Premium (Recommended):</b> Good quality. Uses Red bricks, OPC cement, vitrified tiles (₹45/sqft), and branded switches.",
+        2000: "💎 <b>Luxury (High End):</b> Top tier. Uses AAC blocks, Italian marble/Granite, Teak wood, and premium brands."
     };
 
     let historyChart = null;
@@ -382,7 +384,7 @@
     function addCustomLocation() {
         const name = prompt("Enter City/Location Name:");
         if (!name) return;
-        const rate = prompt("Enter Rate Multiplier (e.g. 1.1):");
+        const rate = prompt("Enter Rate Multiplier (e.g. 1.0 or 0.8):");
         if (!rate || isNaN(rate)) { alert("Invalid Number"); return; }
         const cityId = "custom_" + Date.now();
         const customData = { name: name, multiplier: parseFloat(rate) };
@@ -394,15 +396,19 @@
     }
 
     function loadCustomCities() {
-        let customLocations = JSON.parse(localStorage.getItem('gharEstimateLocs')) || {};
-        const select = document.getElementById('city');
-        const options = select.getElementsByTagName('option');
-        for (let i = options.length - 1; i >= 0; i--) { if (options[i].value.startsWith('custom_')) select.remove(i); }
-        for (let id in customLocations) {
-            const loc = customLocations[id];
-            const opt = document.createElement("option");
-            opt.value = id; opt.innerText = `📍 ${loc.name} (Custom)`; select.appendChild(opt);
-            cityData[id] = { multiplier: loc.multiplier, text: `📢 ${loc.name} Rates: Customized (${loc.multiplier}x)` };
+        try {
+            let customLocations = JSON.parse(localStorage.getItem('gharEstimateLocs')) || {};
+            const select = document.getElementById('city');
+            const options = select.getElementsByTagName('option');
+            for (let i = options.length - 1; i >= 0; i--) { if (options[i].value.startsWith('custom_')) select.remove(i); }
+            for (let id in customLocations) {
+                const loc = customLocations[id];
+                const opt = document.createElement("option");
+                opt.value = id; opt.innerText = `📍 ${loc.name} (Custom)`; select.appendChild(opt);
+                cityData[id] = { multiplier: loc.multiplier, text: `📢 ${loc.name} Rates: Customized (${loc.multiplier}x)` };
+            }
+        } catch (e) {
+            console.log("Error loading custom cities");
         }
     }
 
@@ -536,6 +542,7 @@
             body.innerHTML = "<p><strong>Accuracy:</strong> This tool provides estimates based on average market rates. Actual costs may vary.<br><br><strong>Liability:</strong> GharEstimate Pro is not responsible for any financial loss incurred based on these estimates. Always consult a professional contractor.</p>";
         } else if(type === 'contact') {
             title.innerText = "Contact Us";
+            // 👇 CHANGE EMAIL HERE IF NEEDED 👇
             body.innerHTML = "<p>For advertising or feedback, email us at:<br><strong>best247team@gmail.com</strong><br><br>Address: Digital Tech Hub, Bangalore, India.</p>";
         } else if(type === 'about') {
             title.innerText = "About Us";
